@@ -175,6 +175,12 @@ def cef_root_path(repository_root, target):
                          'sha1={}\n').format(archive_name, target.cef_platform,
                                              CEF_VERSION,
                                              CEF_ARCHIVE_SHA1[target.name])
+  # GTWebUI local (M15-15): a locally built CEF of the same version (proprietary codecs) has no pinned archive. With
+  # JCEF_LOCAL_CEF_BUILD=1 the archive checksum is replaced by the marker file the local build writes.
+  if os.environ.get('JCEF_LOCAL_CEF_BUILD') == '1':
+    if not (path / '.gtwebui-local-cef').is_file():
+      raise DistributionError('Local CEF marker .gtwebui-local-cef is missing at {}'.format(path))
+    return path
   provenance_path = path / '.jcef-cef-provenance'
   try:
     provenance = provenance_path.read_text(encoding='ascii')

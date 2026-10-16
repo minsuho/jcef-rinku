@@ -137,9 +137,16 @@ def _require_java_cef_commit(repository_root, expected_commit):
         'expected {}, found {}.'.format(expected_commit, actual_commit))
 
 
+_LOCAL_CEF_BUILD_TOOLING = ('M CMakeLists.txt', 'M tools/distrib/distribution.py',
+                            'M tools/distrib/make_distrib.py')
+
+
 def _require_clean_source_checkout(repository_root):
   status = _git_output(repository_root, ('status', '--porcelain=v1',
                                          '--untracked-files=normal'))
+  # GTWebUI local CEF build: only the CEF-locating build tooling may differ from HEAD; Java and native sources must not.
+  if status and os.environ.get('JCEF_LOCAL_CEF_BUILD') == '1':
+    status = '\n'.join(line for line in status.splitlines() if line.strip() not in _LOCAL_CEF_BUILD_TOOLING)
   if status:
     raise DistributionError(
         'Java CEF source checkout is dirty; commit identity would not describe '

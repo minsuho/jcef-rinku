@@ -265,8 +265,19 @@ message(STATUS "Target architecture: ${PROJECT_ARCH} (${CEF_PLATFORM})")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Download and extract the CEF binary distribution (executes DownloadCEF.cmake).
-include(DownloadCEF)
-DownloadCEF("${CEF_PLATFORM}" "${CEF_VERSION}" "${CEF_CHANNEL}" "${CMAKE_SOURCE_DIR}/third_party/cef")
+# GTWebUI local (M15-15): -DJCEF_CEF_ROOT=<dir> uses a locally built CEF binary distribution (same CEF version, built
+# with proprietary codecs) instead of the pinned download.
+set(JCEF_CEF_ROOT "" CACHE PATH "Use this CEF binary distribution instead of downloading the pinned one")
+if(JCEF_CEF_ROOT)
+  if(NOT EXISTS "${JCEF_CEF_ROOT}/cmake/FindCEF.cmake")
+    message(FATAL_ERROR "JCEF_CEF_ROOT is not a CEF binary distribution: ${JCEF_CEF_ROOT}")
+  endif()
+  set(CEF_ROOT "${JCEF_CEF_ROOT}" CACHE INTERNAL "CEF_ROOT" FORCE)
+  message(STATUS "Using local CEF binary distribution: ${CEF_ROOT}")
+else()
+  include(DownloadCEF)
+  DownloadCEF("${CEF_PLATFORM}" "${CEF_VERSION}" "${CEF_CHANNEL}" "${CMAKE_SOURCE_DIR}/third_party/cef")
+endif()
 
 # Add the CEF binary distribution's cmake/ directory to the module path.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CEF_ROOT}/cmake")
