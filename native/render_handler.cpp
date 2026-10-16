@@ -280,6 +280,43 @@ void RenderHandler::OnPaint(CefRefPtr<CefBrowser> browser,
                        jdirectBuffer.get(), width, height);
 }
 
+// GTWebUI fork: shared texture paint (CefBrowserSettings.shared_texture_enabled).
+// The texture is only valid until this returns, so Java copies it inside the call.
+void RenderHandler::OnAcceleratedPaint(CefRefPtr<CefBrowser> browser,
+                                       PaintElementType type,
+                                       const RectList& dirtyRects,
+                                       const CefAcceleratedPaintInfo& info) {
+  ScopedJNIEnv env;
+  if (!env)
+    return;
+
+  ScopedJNIBrowser jbrowser(env, browser);
+  jboolean jtype = type == PET_VIEW ? JNI_FALSE : JNI_TRUE;
+  ScopedJNIObjectLocal jrectArray(env, NewJNIRectArray(env, dirtyRects));
+  if (!jrectArray)
+    return;
+
+  ScopedJNIClass cls(env, "org/cef/handler/CefAcceleratedPaintInfo");
+  if (!cls)
+    return;
+  ScopedJNIObjectLocal jinfo(env, NewJNIObject(env, cls));
+  if (!jinfo)
+    return;
+#if defined(OS_WIN)
+  SetJNIFieldLong(env, cls, jinfo, "shared_texture_handle",
+                  reinterpret_cast<jlong>(info.shared_texture_handle));
+#endif
+  SetJNIFieldInt(env, cls, jinfo, "format", info.format);
+  // The pooled texture can keep the old size for a few frames after a resize.
+  SetJNIFieldInt(env, cls, jinfo, "width", info.extra.coded_size.width);
+  SetJNIFieldInt(env, cls, jinfo, "height", info.extra.coded_size.height);
+
+  JNI_CALL_VOID_METHOD(env, handle_, "onAcceleratedPaint",
+                       "(Lorg/cef/browser/CefBrowser;Z[Ljava/awt/"
+                       "Rectangle;Lorg/cef/handler/CefAcceleratedPaintInfo;)V",
+                       jbrowser.get(), jtype, jrectArray.get(), jinfo.get());
+}
+
 void RenderHandler::OnImeCompositionRangeChanged(CefRefPtr<CefBrowser> browser, const CefRange& selected_range, const RectList& character_bounds) {
   REQUIRE_UI_THREAD();
 

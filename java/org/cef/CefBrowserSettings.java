@@ -24,6 +24,13 @@ public class CefBrowserSettings {
     public int windowless_frame_rate = DEFAULT_WINDOWLESS_FRAME_RATE;
 
     /**
+     * GTWebUI fork: off-screen browsers render into a shared D3D11 texture and report it through
+     * {@code CefRenderHandler.onAcceleratedPaint} instead of {@code onPaint} (Windows only). Fixed
+     * when the browser is created.
+     */
+    public boolean shared_texture_enabled = false;
+
+    /**
      * Font family used for text that does not specify a CSS generic family. {@code null} or an
      * empty string uses the platform's recommended default.
      */
@@ -232,6 +239,7 @@ public class CefBrowserSettings {
     public CefBrowserSettings clone() {
         CefBrowserSettings copy = new CefBrowserSettings();
         copy.windowless_frame_rate = windowless_frame_rate;
+        copy.shared_texture_enabled = shared_texture_enabled;
         copy.standard_font_family = standard_font_family;
         copy.fixed_font_family = fixed_font_family;
         copy.serif_font_family = serif_font_family;

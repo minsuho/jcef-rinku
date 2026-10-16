@@ -75,6 +75,13 @@ public interface CefRenderHandler {
     public void onPaint(CefBrowser browser, boolean popup, Rectangle[] dirtyRects, ByteBuffer buffer, int width, int height);
 
     /**
+     * GTWebUI fork: called instead of {@link #onPaint} when the browser was created with
+     * {@code CefBrowserSettings.shared_texture_enabled}. {@code info} is valid only during the call.
+     */
+    public default void onAcceleratedPaint(CefBrowser browser, boolean popup, Rectangle[] dirtyRects,
+            CefAcceleratedPaintInfo info) {}
+
+    /**
      * Called synchronously on CEF's UI thread when the IME composition range changes.
      *
      * <p>{@code selectedRange} preserves CEF's exact unsigned range direction without

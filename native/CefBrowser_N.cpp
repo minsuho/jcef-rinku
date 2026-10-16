@@ -3461,6 +3461,18 @@ void create(std::shared_ptr<JNIObjectsForCreate> objs,
 #endif
   } else {
     windowInfo.SetAsWindowless((CefWindowHandle)windowHandle);
+#if defined(OS_WIN)
+    // GTWebUI fork: shared texture paint, read beside the strict settings conversion.
+    if (objs->jbrowserSettings != nullptr) {
+      ScopedJNIClass settingsCls(env, env->GetObjectClass(objs->jbrowserSettings));
+      int sharedTexture = 0;
+      if (settingsCls &&
+          GetJNIFieldBoolean(env, settingsCls, objs->jbrowserSettings,
+                             "shared_texture_enabled", &sharedTexture)) {
+        windowInfo.shared_texture_enabled = sharedTexture ? 1 : 0;
+      }
+    }
+#endif
   }
 
   CefRefPtr<CefBrowser> browserObj;
