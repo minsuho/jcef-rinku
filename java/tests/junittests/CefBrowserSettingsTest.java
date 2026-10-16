@@ -107,7 +107,7 @@ class CefBrowserSettingsTest {
         CefBrowserSettings settings = new CefBrowserSettings();
 
         long instanceFieldCount = Arrays.stream(CefBrowserSettings.class.getFields()).filter(field -> !Modifier.isStatic(field.getModifiers())).count();
-        assertEquals(26, instanceFieldCount);
+        assertEquals(27, instanceFieldCount);
         assertEquals(60, CefBrowserSettings.DEFAULT_WINDOWLESS_FRAME_RATE);
         assertEquals(CefBrowserSettings.DEFAULT_WINDOWLESS_FRAME_RATE, settings.windowless_frame_rate);
         assertNull(settings.standard_font_family);
@@ -135,6 +135,7 @@ class CefBrowserSettingsTest {
         assertNull(settings.background_color);
         assertSame(CefState.DEFAULT, settings.chrome_status_bubble);
         assertSame(CefState.DEFAULT, settings.chrome_zoom_bubble);
+        assertFalse(settings.shared_texture_enabled);
     }
 
     @Test
@@ -170,6 +171,7 @@ class CefBrowserSettingsTest {
         assertSame(settings.background_color, copy.background_color);
         assertSame(settings.chrome_status_bubble, copy.chrome_status_bubble);
         assertSame(settings.chrome_zoom_bubble, copy.chrome_zoom_bubble);
+        assertEquals(settings.shared_texture_enabled, copy.shared_texture_enabled);
 
         copy.standard_font_family = "changed";
         copy.javascript = CefState.DEFAULT;
@@ -367,6 +369,7 @@ class CefBrowserSettingsTest {
         settings.background_color = CefColor.fromArgb(0xFF123456);
         settings.chrome_status_bubble = CefState.ENABLED;
         settings.chrome_zoom_bubble = CefState.DISABLED;
+        settings.shared_texture_enabled = true;
         return settings;
     }
 }
